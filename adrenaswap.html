@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AdrenaSwap — Intercambio de Cartas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #1a9c3e;
+      --green-light: #23c44e;
+      --gold: #f5a623;
+      --gold-light: #ffd166;
+      --red: #e22d2d;
+      --dark: #0f1923;
+      --dark2: #1a2636;
+      --dark3: #243347;
+      --text: #ffffff;
+      --text-muted: #8fa3b8;
+      --card-bg: #1a2636;
+      --border: rgba(255,255,255,0.1);
+    }
+
+    body {
+      background: var(--dark);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+    }
+
+    #app {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* HEADER */
+    .header {
+      background: linear-gradient(135deg, #0f1923 0%, #1a3a1a 50%, #0f1923 100%);
+      border-bottom: 2px solid var(--green);
+      padding: 0 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0 8px;
+    }
+    .logo { display: flex; align-items: center; gap: 8px; }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: var(--green);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .logo-text {
+      font-family: 'Bebas Neue', Impact, sans-serif;
+      font-size: 22px; letter-spacing: 1px; color: #fff; line-height: 1;
+    }
+    .logo-sub {
+      font-size: 9px; color: var(--green-light);
+      letter-spacing: 2px; text-transform: uppercase; font-weight: 600;
+    }
+    .header-stats { display: flex; gap: 16px; align-items: center; }
+    .stat-badge { display: flex; flex-direction: column; align-items: center; }
+    .stat-badge .num { font-size: 16px; font-weight: 700; color: var(--gold); }
+    .stat-badge .lbl { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+
+    .nav { display: flex; gap: 4px; padding: 8px 0 0; }
+    .nav-btn {
+      background: none; border: none; color: var(--text-muted);
+      font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
+      letter-spacing: 0.5px; text-transform: uppercase;
+      padding: 8px 14px; cursor: pointer;
+      border-bottom: 2px solid transparent; transition: all 0.2s;
+    }
+    .nav-btn:hover { color: #fff; }
+    .nav-btn.active { color: var(--green-light); border-bottom-color: var(--green-light); }
+
+    /* MAIN */
+    .main { padding: 16px; flex: 1; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* WELCOME */
+    .welcome-banner {
+      background: linear-gradient(90deg, rgba(26,156,62,0.2), rgba(26,156,62,0.05));
+      border: 1px solid rgba(26,156,62,0.3);
+      border-radius: 10px; padding: 12px 14px; margin-bottom: 16px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .welcome-text { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+    .welcome-text strong { color: var(--green-light); }
+
+    /* SEARCH */
+    .search-row { display: flex; gap: 8px; margin-bottom: 16px; }
+    .search-input {
+      flex: 1; background: var(--dark2); border: 1px solid var(--border);
+      border-radius: 8px; color: #fff; font-family: 'Inter', sans-serif;
+      font-size: 13px; padding: 10px 14px; outline: none;
+    }
+    .search-input:focus { border-color: var(--green); }
+    .search-input::placeholder { color: var(--text-muted); }
+    .filter-btn {
+      background: var(--dark2); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text-muted); font-size: 16px;
+      padding: 10px 14px; cursor: pointer;
+    }
+
+    /* TOGGLE */
+    .toggle-row { display: flex; gap: 8px; margin-bottom: 16px; }
+    .toggle-btn {
+      flex: 1; border: 1.5px solid var(--border); border-radius: 8px;
+      background: var(--dark2); color: var(--text-muted);
+      font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700;
+      padding: 10px; cursor: pointer; text-transform: uppercase;
+      letter-spacing: 0.5px; transition: all 0.2s; text-align: center;
+    }
+    .toggle-btn.active-offer { background: rgba(26,156,62,0.2); border-color: var(--green); color: var(--green-light); }
+    .toggle-btn.active-want { background: rgba(245,166,35,0.2); border-color: var(--gold); color: var(--gold-light); }
+
+    /* CHIPS */
+    .filter-chips { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+    .chip {
+      background: var(--dark2); border: 1px solid var(--border);
+      border-radius: 20px; color: var(--text-muted);
+      font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
+      padding: 5px 12px; cursor: pointer; transition: all 0.2s; letter-spacing: 0.3px;
+    }
+    .chip:hover { border-color: var(--green); color: #fff; }
+    .chip.active { background: var(--green); border-color: var(--green); color: #fff; }
+
+    /* SECTION TITLE */
+    .section-title {
+      font-family: 'Bebas Neue', Impact, sans-serif;
+      font-size: 18px; letter-spacing: 1px; color: #fff;
+      margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+    }
+    .section-title .accent { color: var(--green-light); }
+    .section-count {
+      background: var(--dark3); color: var(--text-muted);
+      font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
+      padding: 2px 8px; border-radius: 10px;
+    }
+
+    /* CARDS GRID */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 10px; margin-bottom: 20px;
+    }
+    .trade-card {
+      background: var(--card-bg); border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden; cursor: pointer;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    .trade-card:hover { transform: translateY(-2px); border-color: var(--green); }
+    .card-visual {
+      position: relative; height: 110px;
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
+    }
+    .card-bg-laliga { background: linear-gradient(135deg, #1a0533, #5c0099); }
+    .card-bg-ucl { background: linear-gradient(135deg, #00256b, #c8a400); }
+    .card-bg-wc { background: linear-gradient(135deg, #004d26, #8b0000); }
+    .card-shine {
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+    }
+    .card-number {
+      position: absolute; top: 6px; left: 8px;
+      font-family: 'Bebas Neue', Impact, sans-serif;
+      font-size: 13px; color: rgba(255,255,255,0.5);
+    }
+    .card-rarity {
+      position: absolute; top: 6px; right: 8px;
+      font-size: 10px; font-weight: 700; font-family: 'Inter', sans-serif;
+      padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px;
+    }
+    .rarity-limited { background: #f5a623; color: #000; }
+    .rarity-base { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.8); }
+    .rarity-hero { background: #e22d2d; color: #fff; }
+    .rarity-fans { background: var(--green); color: #fff; }
+    .player-avatar {
+      width: 60px; height: 60px; border-radius: 50%;
+      background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; position: relative; z-index: 1;
+    }
+    .card-info { padding: 8px 10px 10px; }
+    .card-player {
+      font-family: 'Bebas Neue', Impact, sans-serif;
+      font-size: 15px; color: #fff; line-height: 1.1; margin-bottom: 2px;
+    }
+    .card-club { font-size: 10px; color: var(--text-muted); font-weight: 500; margin-bottom: 6px; }
+    .card-footer { display: flex; align-items: center; justify-content: space-between; }
+    .card-user { display: flex; align-items: center; gap: 4px; }
+    .user-dot {
+      width: 18px; height: 18px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 8px; font-weight: 700; font-family: 'Inter', sans-serif; color: #fff;
+    }
+    .card-username { font-size: 9px; color: var(--text-muted); }
+    .stars { font-size: 8px; color: var(--gold); }
+    .card-action-btn {
+      background: var(--green); border: none; border-radius: 6px;
+      color: #fff; font-family: 'Inter', sans-serif;
+      font-size: 10px; font-weight: 700; padding: 4px 8px; cursor: pointer;
+    }
+
+    /* FORMULARIO PUBLICAR */
+    .form-section { margin-bottom: 16px; }
+    .form-label {
+      font-size: 11px; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: block;
+    }
+    .form-input {
+      width: 100%; background: var(--dark2); border: 1px solid var(--border);
+      border-radius: 8px; color: #fff; font-family: 'Inter', sans-serif;
+      font-size: 13px; padding: 10px 14px; outline: none;
+    }
+    .form-input:focus { border-color: var(--green); }
+    .form-select {
+      width: 100%; background: var(--dark2); border: 1px solid var(--border);
+      border-radius: 8px; color: #fff; font-family: 'Inter', sans-serif;
+      font-size: 13px; padding: 10px 14px; outline: none; appearance: none;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .publish-btn {
+      width: 100%; background: var(--green); border: none; border-radius: 10px;
+      color: #fff; font-family: 'Bebas Neue', Impact, sans-serif;
+      font-size: 20px; letter-spacing: 1px; padding: 14px; cursor: pointer;
+      transition: background 0.2s; margin-top: 8px;
+    }
+    .publish-btn:hover { background: var(--green-light); }
+
+    /* CHAT LIST */
+    .chat-list { display: flex; flex-direction: column; gap: 8px; }
+    .chat-item {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--card-bg); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 14px; cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .chat-item:hover { border-color: var(--green); }
+    .chat-avatar {
+      width: 42px; height: 42px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-family: 'Inter', sans-serif;
+      font-size: 14px; color: #fff; flex-shrink: 0;
+    }
+    .chat-body { flex: 1; min-width: 0; }
+    .chat-name { font-weight: 600; font-size: 14px; color: #fff; margin-bottom: 2px; }
+    .chat-preview { font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .chat-meta { text-align: right; }
+    .chat-time { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; }
+    .chat-unread {
+      width: 18px; height: 18px; background: var(--green); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 700; color: #fff; margin-left: auto;
+    }
+
+    /* CHAT WINDOW */
+    .chat-window { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .chat-win-header {
+      background: var(--dark2); padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .back-btn { background: none; border: none; color: var(--green-light); font-size: 18px; cursor: pointer; padding: 0 8px 0 0; }
+    .chat-messages { padding: 12px; min-height: 200px; display: flex; flex-direction: column; gap: 8px; }
+    .msg { max-width: 75%; padding: 8px 12px; border-radius: 10px; font-size: 12px; line-height: 1.5; }
+    .msg-them { background: var(--dark3); color: #fff; align-self: flex-start; border-bottom-left-radius: 2px; }
+    .msg-me { background: var(--green); color: #fff; align-self: flex-end; border-bottom-right-radius: 2px; }
+    .chat-input-row { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--border); }
+    .chat-input-row input {
+      flex: 1; background: var(--dark2); border: 1px solid var(--border);
+      border-radius: 8px; color: #fff; font-family: 'Inter', sans-serif;
+      font-size: 12px; padding: 8px 12px; outline: none;
+    }
+    .send-btn { background: var(--green); border: none; border-radius: 8px; color: #fff; font-size: 14px; padding: 8px 12px; cursor: pointer; }
+
+    /* PERFIL */
+    .profile-header {
+      background: var(--dark2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px; margin-bottom: 16px;
+      display: flex; align-items: center; gap: 14px;
+    }
+    .profile-avatar {
+      width: 56px; height: 56px; border-radius: 50%; background: var(--green);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Bebas Neue', Impact, sans-serif; font-size: 24px; color: #fff;
+      border: 2px solid var(--green-light); flex-shrink: 0;
+    }
+    .profile-name { font-family: 'Bebas Neue', Impact, sans-serif; font-size: 20px; color: #fff; line-height: 1; margin-bottom: 4px; }
+    .profile-location { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
+    .profile-rating { display: flex; align-items: center; gap: 6px; }
+    .big-stars { color: var(--gold); font-size: 14px; }
+    .rating-num { font-weight: 700; font-size: 14px; color: var(--gold); }
+    .rating-count { font-size: 11px; color: var(--text-muted); }
+    .profile-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+    .pstat { background: var(--dark2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center; }
+    .pstat-num { font-family: 'Bebas Neue', Impact, sans-serif; font-size: 22px; color: var(--gold); }
+    .pstat-lbl { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+
+    /* REVIEWS */
+    .review-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; }
+    .review-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .review-user { font-weight: 600; font-size: 13px; color: #fff; }
+    .review-stars { color: var(--gold); font-size: 12px; }
+    .review-date { font-size: 10px; color: var(--text-muted); margin-left: auto; }
+    .review-text { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+    .review-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: rgba(26,156,62,0.15); border: 1px solid rgba(26,156,62,0.3);
+      color: var(--green-light); font-size: 10px; font-weight: 700;
+      padding: 3px 8px; border-radius: 6px; margin-top: 6px;
+    }
+
+    /* TOAST */
+    .toast {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: var(--green); color: #fff; font-weight: 600; font-size: 13px;
+      padding: 10px 20px; border-radius: 10px; opacity: 0;
+      transition: opacity 0.3s; z-index: 999; pointer-events: none;
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <div class="header-top">
+      <div class="logo">
+        <div class="logo-icon">⚡</div>
+        <div>
+          <div class="logo-text">AdrenaSwap</div>
+          <div class="logo-sub">Intercambio de cromos</div>
+        </div>
+      </div>
+      <div class="header-stats">
+        <div class="stat-badge">
+          <span class="num" id="totalUsers">1</span>
+          <span class="lbl">Usuarios</span>
+        </div>
+        <div class="stat-badge">
+          <span class="num" style="color:var(--green-light)" id="totalCards">0</span>
+          <span class="lbl">Cartas</span>
+        </div>
+      </div>
+    </div>
+    <nav class="nav">
+      <button class="nav-btn active" onclick="switchTab('explorar', this)">Explorar</button>
+      <button class="nav-btn" onclick="switchTab('publicar', this)">Publicar</button>
+      <button class="nav-btn" onclick="switchTab('mensajes', this)">Mensajes</button>
+      <button class="nav-btn" onclick="switchTab('perfil', this)">Mi perfil</button>
+    </nav>
+  </div>
+
+  <div class="main">
+
+    <!-- EXPLORAR -->
+    <div id="tab-explorar" class="tab-content active">
+      <div class="welcome-banner">
+        <span style="font-size:22px">⚽</span>
+        <div class="welcome-text"><strong>¡Bienvenido a AdrenaSwap!</strong> La comunidad de intercambio de cartas Adrenalyn. Publica las tuyas y encuentra las que te faltan.</div>
+      </div>
+      <div class="search-row">
+        <input type="text" class="search-input" placeholder="Buscar jugador, equipo, nº carta..." id="searchInput" oninput="renderCards()">
+        <button class="filter-btn">⚙</button>
+      </div>
+      <div class="toggle-row">
+        <button class="toggle-btn active-offer" id="btn-ofrezco" onclick="toggleMode('ofrezco')">🟢 Ofrezco</button>
+        <button class="toggle-btn" id="btn-busco" onclick="toggleMode('busco')">🟡 Busco</button>
+      </div>
+      <div class="filter-chips">
+        <button class="chip active" onclick="filterChip(this,'todas')">Todas</button>
+        <button class="chip" onclick="filterChip(this,'LaLiga 2024-25')">LaLiga</button>
+        <button class="chip" onclick="filterChip(this,'Champions League 2024-25')">Champions</button>
+        <button class="chip" onclick="filterChip(this,'Mundial')">Mundial</button>
+        <button class="chip" onclick="filterChip(this,'Limited')">Limited</button>
+        <button class="chip" onclick="filterChip(this,'Hero')">Hero</button>
+      </div>
+      <div class="section-title">
+        <span>Cartas</span><span class="accent"> disponibles</span>
+        <span class="section-count" id="cardCount">0 cartas</span>
+      </div>
+      <div class="cards-grid" id="cardsGrid">
+        <div style="grid-column:1/-1;text-align:center;padding:40px 20px;color:var(--text-muted);">
+          <div style="font-size:40px;margin-bottom:12px">🃏</div>
+          <div style="font-size:14px;margin-bottom:6px;color:#fff;">Aún no hay cartas publicadas</div>
+          <div style="font-size:12px;">¡Sé el primero en publicar la tuya!</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PUBLICAR -->
+    <div id="tab-publicar" class="tab-content">
+      <div class="section-title"><span>Nueva</span><span class="accent"> publicación</span></div>
+      <div class="toggle-row">
+        <button class="toggle-btn active-offer" id="pub-ofrezco" onclick="togglePub('ofrezco')">🟢 Ofrezco esta carta</button>
+        <button class="toggle-btn" id="pub-busco" onclick="togglePub('busco')">🟡 Busco esta carta</button>
+      </div>
+      <div class="form-section">
+        <label class="form-label">Tu nombre de usuario</label>
+        <input type="text" class="form-input" id="pub-username" placeholder="Ej: BarçaColeccionista">
+      </div>
+      <div class="form-section">
+        <label class="form-label">Colección</label>
+        <select class="form-select" id="pub-col">
+          <option value="">Selecciona colección...</option>
+          <option>LaLiga 2024-25</option>
+          <option>Champions League 2024-25</option>
+          <option>Mundial Qatar 2022</option>
+          <option>Mundial 2026</option>
+          <option>LaLiga 2023-24</option>
+        </select>
+      </div>
+      <div class="form-section">
+        <label class="form-label">Nombre del jugador</label>
+        <input type="text" class="form-input" id="pub-player" placeholder="Ej: Vinicius Jr., Pedri, Bellingham...">
+      </div>
+      <div class="form-row">
+        <div class="form-section">
+          <label class="form-label">Nº de carta</label>
+          <input type="text" class="form-input" id="pub-num" placeholder="Ej: 132">
+        </div>
+        <div class="form-section">
+          <label class="form-label">Rareza</label>
+          <select class="form-select" id="pub-rarity">
+            <option>Base</option>
+            <option>Limited</option>
+            <option>Hero</option>
+            <option>Fans Favourite</option>
+            <option>TOP</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-section">
+        <label class="form-label">Cartas que aceptarías a cambio</label>
+        <input type="text" class="form-input" id="pub-wants" placeholder="Ej: busco Mbappé LaLiga, Haaland UCL...">
+      </div>
+      <div class="form-section">
+        <label class="form-label">Estado de la carta</label>
+        <select class="form-select" id="pub-estado">
+          <option>Perfecta (nueva)</option>
+          <option>Muy buena</option>
+          <option>Buena</option>
+          <option>Aceptable</option>
+        </select>
+      </div>
+      <div class="form-section">
+        <label class="form-label">Tu ciudad</label>
+        <input type="text" class="form-input" id="pub-ciudad" placeholder="Ej: Barcelona, Madrid, Valencia...">
+      </div>
+      <div class="form-section">
+        <label class="form-label">Notas adicionales (opcional)</label>
+        <input type="text" class="form-input" id="pub-notas" placeholder="Ej: Solo intercambio presencial, tengo repetidas...">
+      </div>
+      <button class="publish-btn" onclick="publishCard()">Publicar anuncio ⚡</button>
+    </div>
+
+    <!-- MENSAJES -->
+    <div id="tab-mensajes" class="tab-content">
+      <div id="chat-list-view">
+        <div class="section-title"><span>Tus</span><span class="accent"> mensajes</span></div>
+        <div class="chat-list" id="chatList">
+          <div style="text-align:center;padding:40px 20px;color:var(--text-muted);">
+            <div style="font-size:40px;margin-bottom:12px">💬</div>
+            <div style="font-size:14px;margin-bottom:6px;color:#fff;">Sin mensajes todavía</div>
+            <div style="font-size:12px;">Cuando contactes con alguien aparecerá aquí</div>
+          </div>
+        </div>
+      </div>
+      <div id="chat-window-view" style="display:none">
+        <div class="chat-window">
+          <div class="chat-win-header">
+            <button class="back-btn" onclick="closeChat()">←</button>
+            <div class="chat-avatar" id="chatWinAvatar" style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#fff;"></div>
+            <div>
+              <div style="font-weight:600;font-size:13px;" id="chatWinName"></div>
+              <div style="font-size:10px;color:var(--green-light);">● En línea</div>
+            </div>
+          </div>
+          <div class="chat-messages" id="chatMessages"></div>
+          <div class="chat-input-row">
+            <input type="text" placeholder="Escribe un mensaje..." id="chatInputMsg" onkeydown="if(event.key==='Enter')sendMsg()">
+            <button class="send-btn" onclick="sendMsg()">➤</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PERFIL -->
+    <div id="tab-perfil" class="tab-content">
+      <div class="profile-header">
+        <div class="profile-avatar" id="profileAvatar">?</div>
+        <div class="profile-info">
+          <div class="profile-name" id="profileName">Mi perfil</div>
+          <div class="profile-location" id="profileLocation">📍 —</div>
+          <div class="profile-rating">
+            <span class="big-stars">☆☆☆☆☆</span>
+            <span class="rating-num">—</span>
+            <span class="rating-count">(0 valoraciones)</span>
+          </div>
+        </div>
+      </div>
+      <div class="profile-stats">
+        <div class="pstat">
+          <div class="pstat-num" id="statTotal">0</div>
+          <div class="pstat-lbl">Intercambios</div>
+        </div>
+        <div class="pstat">
+          <div class="pstat-num" id="statOfrece">0</div>
+          <div class="pstat-lbl">Ofrezco</div>
+        </div>
+        <div class="pstat">
+          <div class="pstat-num" id="statBusca">0</div>
+          <div class="pstat-lbl">Busco</div>
+        </div>
+      </div>
+      <div class="section-title"><span>Mis</span><span class="accent"> publicaciones</span></div>
+      <div id="myCards">
+        <div style="text-align:center;padding:30px 20px;color:var(--text-muted);">
+          <div style="font-size:12px;">Aún no has publicado ninguna carta</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // Base de datos local (se guarda en el navegador)
+  let cards = JSON.parse(localStorage.getItem('adrenaswap_cards') || '[]');
+  let chats = JSON.parse(localStorage.getItem('adrenaswap_chats') || '[]');
+  let myUsername = localStorage.getItem('adrenaswap_username') || '';
+  let currentFilter = 'todas';
+  let currentMode = 'ofrezco';
+  let pubMode = 'ofrezco';
+  let currentChatId = null;
+
+  const COLORS = ['#e22d2d','#1a9c3e','#f5a623','#5c0099','#00b4d8','#74b9ff','#fd79a8','#a29bfe'];
+  const EMOJIS = { 'LaLiga 2024-25':'🏟️', 'Champions League 2024-25':'🏆', 'Mundial Qatar 2022':'🌍', 'Mundial 2026':'🌎', 'LaLiga 2023-24':'⚽', '':'⚡' };
+  const BG = { 'LaLiga 2024-25':'card-bg-laliga', 'Champions League 2024-25':'card-bg-ucl', 'Mundial Qatar 2022':'card-bg-wc', 'Mundial 2026':'card-bg-wc', 'LaLiga 2023-24':'card-bg-laliga', '':'card-bg-laliga' };
+  const RARITY_CLASS = { 'Limited':'rarity-limited', 'Base':'rarity-base', 'Hero':'rarity-hero', 'Fans Favourite':'rarity-fans', 'TOP':'rarity-limited' };
+
+  function saveCards() { localStorage.setItem('adrenaswap_cards', JSON.stringify(cards)); }
+  function saveChats() { localStorage.setItem('adrenaswap_chats', JSON.stringify(chats)); }
+
+  function updateStats() {
+    document.getElementById('totalCards').textContent = cards.length;
+    const users = [...new Set(cards.map(c => c.username))].length;
+    document.getElementById('totalUsers').textContent = Math.max(1, users);
+  }
+
+  function renderCards() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const grid = document.getElementById('cardsGrid');
+    let filtered = cards.filter(c => {
+      const matchMode = currentMode === 'ofrezco' ? c.mode === 'ofrezco' : c.mode === 'busco';
+      const matchFilter = currentFilter === 'todas' || c.coleccion === currentFilter || c.rareza === currentFilter;
+      const matchSearch = !search || c.jugador.toLowerCase().includes(search) || c.coleccion.toLowerCase().includes(search) || String(c.num).includes(search);
+      return matchMode && matchFilter && matchSearch;
+    });
+    document.getElementById('cardCount').textContent = filtered.length + ' cartas';
+    if (filtered.length === 0) {
+      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px 20px;color:var(--text-muted);">
+        <div style="font-size:40px;margin-bottom:12px">🃏</div>
+        <div style="font-size:14px;margin-bottom:6px;color:#fff;">No hay cartas todavía</div>
+        <div style="font-size:12px;">¡Sé el primero en publicar!</div>
+      </div>`;
+      return;
+    }
+    grid.innerHTML = filtered.map(c => {
+      const color = COLORS[Math.abs(hashStr(c.username)) % COLORS.length];
+      const emoji = EMOJIS[c.coleccion] || '⚡';
+      const bg = BG[c.coleccion] || 'card-bg-laliga';
+      const rc = RARITY_CLASS[c.rareza] || 'rarity-base';
+      return `<div class="trade-card" onclick="openChatWith('${c.username}','${color}')">
+        <div class="card-visual ${bg}">
+          <div class="card-shine"></div>
+          <div class="card-number">#${c.num||'—'}</div>
+          <div class="card-rarity ${rc}">${c.rareza.toUpperCase()}</div>
+          <div class="player-avatar">${emoji}</div>
+        </div>
+        <div class="card-info">
+          <div class="card-player">${c.jugador}</div>
+          <div class="card-club">${c.coleccion}</div>
+          <div class="card-footer">
+            <div class="card-user">
+              <div class="user-dot" style="background:${color}">${c.username[0]||'?'}</div>
+              <div>
+                <div class="card-username">${c.username}</div>
+                <div class="stars">★★★★★</div>
+              </div>
+            </div>
+            <button class="card-action-btn" onclick="event.stopPropagation();openChatWith('${c.username}','${color}')">Contactar</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function hashStr(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    return hash;
+  }
+
+  function filterChip(el, val) {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    currentFilter = val;
+    renderCards();
+  }
+
+  function toggleMode(mode) {
+    currentMode = mode;
+    document.getElementById('btn-ofrezco').className = 'toggle-btn' + (mode==='ofrezco'?' active-offer':'');
+    document.getElementById('btn-busco').className = 'toggle-btn' + (mode==='busco'?' active-want':'');
+    renderCards();
+  }
+
+  function togglePub(mode) {
+    pubMode = mode;
+    document.getElementById('pub-ofrezco').className = 'toggle-btn' + (mode==='ofrezco'?' active-offer':'');
+    document.getElementById('pub-busco').className = 'toggle-btn' + (mode==='busco'?' active-want':'');
+  }
+
+  function publishCard() {
+    const username = document.getElementById('pub-username').value.trim();
+    const coleccion = document.getElementById('pub-col').value;
+    const jugador = document.getElementById('pub-player').value.trim();
+    const num = document.getElementById('pub-num').value.trim();
+    const rareza = document.getElementById('pub-rarity').value;
+    const wants = document.getElementById('pub-wants').value.trim();
+    const estado = document.getElementById('pub-estado').value;
+    const ciudad = document.getElementById('pub-ciudad').value.trim();
+    const notas = document.getElementById('pub-notas').value.trim();
+
+    if (!username) { showToast('⚠️ Escribe tu nombre de usuario'); return; }
+    if (!coleccion) { showToast('⚠️ Selecciona una colección'); return; }
+    if (!jugador) { showToast('⚠️ Escribe el nombre del jugador'); return; }
+
+    myUsername = username;
+    localStorage.setItem('adrenaswap_username', username);
+
+    const card = { id: Date.now(), mode: pubMode, username, coleccion, jugador, num, rareza, wants, estado, ciudad, notas, fecha: new Date().toLocaleDateString('es-ES') };
+    cards.unshift(card);
+    saveCards();
+    updateStats();
+    updateProfile();
+
+    document.getElementById('pub-player').value = '';
+    document.getElementById('pub-num').value = '';
+    document.getElementById('pub-wants').value = '';
+    document.getElementById('pub-notas').value = '';
+
+    showToast('¡Carta publicada con éxito! ⚡');
+    setTimeout(() => switchTab('explorar', document.querySelector('.nav-btn')), 1500);
+    renderCards();
+  }
+
+  function openChatWith(username, color) {
+    if (username === myUsername || !myUsername) {
+      if (!myUsername) showToast('⚠️ Primero publica una carta con tu usuario');
+      return;
+    }
+    let chat = chats.find(c => c.with === username);
+    if (!chat) {
+      chat = { id: Date.now(), with: username, color, initials: username.slice(0,2).toUpperCase(), msgs: [], unread: 0 };
+      chats.unshift(chat);
+      saveChats();
+    }
+    switchTab('mensajes', document.querySelectorAll('.nav-btn')[2]);
+    openChat(chat.id);
+  }
+
+  function renderChatList() {
+    const list = document.getElementById('chatList');
+    if (chats.length === 0) {
+      list.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--text-muted);">
+        <div style="font-size:40px;margin-bottom:12px">💬</div>
+        <div style="font-size:14px;margin-bottom:6px;color:#fff;">Sin mensajes todavía</div>
+        <div style="font-size:12px;">Cuando contactes con alguien aparecerá aquí</div>
+      </div>`;
+      return;
+    }
+    list.innerHTML = chats.map(c => {
+      const last = c.msgs[c.msgs.length-1];
+      return `<div class="chat-item" onclick="openChat(${c.id})">
+        <div class="chat-avatar" style="background:${c.color}">${c.initials}</div>
+        <div class="chat-body">
+          <div class="chat-name">${c.with}</div>
+          <div class="chat-preview">${last ? last.text : 'Nuevo chat'}</div>
+        </div>
+        <div class="chat-meta">
+          <div class="chat-time">${last ? 'ahora' : ''}</div>
+          ${c.unread ? `<div class="chat-unread">${c.unread}</div>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function openChat(id) {
+    currentChatId = id;
+    const c = chats.find(x => x.id === id);
+    if (!c) return;
+    c.unread = 0;
+    saveChats();
+    document.getElementById('chatWinName').textContent = c.with;
+    document.getElementById('chatWinAvatar').textContent = c.initials;
+    document.getElementById('chatWinAvatar').style.background = c.color;
+    renderMessages(c);
+    document.getElementById('chat-list-view').style.display = 'none';
+    document.getElementById('chat-window-view').style.display = 'block';
+  }
+
+  function renderMessages(c) {
+    const container = document.getElementById('chatMessages');
+    if (c.msgs.length === 0) {
+      container.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:12px;">Envía el primer mensaje a ${c.with} 👋</div>`;
+      return;
+    }
+    container.innerHTML = c.msgs.map(m =>
+      `<div class="msg ${m.me?'msg-me':'msg-them'}">${m.text}</div>`
+    ).join('');
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function closeChat() {
+    currentChatId = null;
+    document.getElementById('chat-list-view').style.display = 'block';
+    document.getElementById('chat-window-view').style.display = 'none';
+    renderChatList();
+  }
+
+  function sendMsg() {
+    const input = document.getElementById('chatInputMsg');
+    const text = input.value.trim();
+    if (!text || !currentChatId) return;
+    const c = chats.find(x => x.id === currentChatId);
+    if (!c) return;
+    c.msgs.push({ me: true, text });
+    input.value = '';
+    saveChats();
+    renderMessages(c);
+  }
+
+  function updateProfile() {
+    if (!myUsername) return;
+    document.getElementById('profileAvatar').textContent = myUsername.slice(0,2).toUpperCase();
+    document.getElementById('profileName').textContent = myUsername;
+    const myCards = cards.filter(c => c.username === myUsername);
+    const ciudad = myCards[0]?.ciudad || '—';
+    document.getElementById('profileLocation').textContent = '📍 ' + ciudad;
+    document.getElementById('statOfrece').textContent = myCards.filter(c => c.mode==='ofrezco').length;
+    document.getElementById('statBusca').textContent = myCards.filter(c => c.mode==='busco').length;
+    document.getElementById('statTotal').textContent = myCards.length;
+    const myCardsDiv = document.getElementById('myCards');
+    if (myCards.length === 0) {
+      myCardsDiv.innerHTML = `<div style="text-align:center;padding:30px 20px;color:var(--text-muted);font-size:12px;">Aún no has publicado ninguna carta</div>`;
+    } else {
+      myCardsDiv.innerHTML = myCards.map(c => `
+        <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-weight:600;font-size:13px;color:#fff;">${c.jugador}</div>
+            <div style="font-size:11px;color:var(--text-muted);">${c.coleccion} · #${c.num||'—'} · ${c.rareza}</div>
+            <div style="font-size:10px;color:${c.mode==='ofrezco'?'var(--green-light)':'var(--gold)'};margin-top:3px;font-weight:700;">${c.mode==='ofrezco'?'🟢 OFREZCO':'🟡 BUSCO'}</div>
+          </div>
+          <button onclick="deleteCard(${c.id})" style="background:rgba(226,45,45,0.15);border:1px solid rgba(226,45,45,0.3);border-radius:6px;color:#e22d2d;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;">Borrar</button>
+        </div>
+      `).join('');
+    }
+  }
+
+  function deleteCard(id) {
+    cards = cards.filter(c => c.id !== id);
+    saveCards();
+    updateStats();
+    updateProfile();
+    renderCards();
+    showToast('Carta eliminada');
+  }
+
+  function switchTab(tab, btn) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    if (btn) btn.classList.add('active');
+    if (tab === 'mensajes') renderChatList();
+    if (tab === 'perfil') updateProfile();
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // INIT
+  updateStats();
+  renderCards();
+  if (myUsername) updateProfile();
+</script>
+</body>
+</html>
